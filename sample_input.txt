@@ -1,0 +1,12 @@
+This is a sample text file for testing the text processor program.
+It contains multiple lines and various words of different lengths.
+
+Some words are repeated multiple times, like "test" and "program".
+This helps in testing the word frequency counter.
+
+Special characters: !@#$%^&*()
+Numbers: 12345 67890
+
+Empty lines should be handled properly.
+
+The program should handle this file correctly and produce meaningful output. 
