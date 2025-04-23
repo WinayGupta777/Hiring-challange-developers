@@ -19,12 +19,17 @@ Complete the implementation of a text file processor program by filling in the T
 
 ## Setup Instructions
 1. Make sure you have a C compiler installed (gcc recommended)
-2. Clone this repository
-3. Navigate to the project directory
+2. Clone this repository: `git clone https://github.com/WinayGupta777/Hiring-challange-developers`
+3. Navigate to the project directory: `cd Hiring-challange-developers/`
 4. Copy `text_processor_template.c` to `text_processor.c`
 5. Implement the solution in `text_processor.c`
 6. Compile the program using: `gcc -o text_processor text_processor.c`
 7. Run the program: `./text_processor input.txt output.txt`
+8. To test your solution: 
+```
+chmod +x test_program.sh
+sudo ./test_program.sh
+```
 
 ## Template Structure
 The template file (`text_processor_template.c`) provides:
